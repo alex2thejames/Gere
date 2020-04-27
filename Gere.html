@@ -1,0 +1,1004 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <title>Gere</title>
+        <style>
+            body {
+                margin: 0px;
+                padding: 0px;
+                padding-left: 15px;
+            }
+            .aButton {
+                margin-top: 15px;
+                margin-left: -2px;
+            }
+            p {
+                margin-bottom: 10px;
+            }
+            canvas {
+                margin-bottom: -500px;
+                z-index: -1;
+                position: absolute;
+            }
+            .classBox {
+                width: 555px;
+                position: absolute;
+                border: dashed 2px gray;
+                margin-top: 210px;
+                margin-left: 50px;
+                padding: 15px;
+                padding-left: 25px;
+            }
+            .spinBox {
+                width: 278px;
+                display: inline-block;
+            }
+            .upgradeContainerStyle1 {
+                height: 115px;
+                width: 262px;
+                border: dashed 2px gray;
+                display: inline-block;
+                vertical-align: text-bottom;
+            }
+            .upgradeContainerStyle2 {
+                height: 50px;
+                width: 262px;
+                border: dashed 2px gray;
+                display: inline-block;
+                vertical-align: text-bottom;
+            }
+            .upgradeBox {
+                width: 262px;
+                display: inline-block;
+            }
+            #upgradeContainer2 {
+                margin-bottom: 5px;
+            }
+            #upgradeContainer3 {
+                margin-bottom: 5px;
+            }
+            .winBox {
+                color: gold;
+                font-size: 50px;
+                position: absolute;
+                margin-top: 170px;
+                margin-left: 400px;
+            }
+            .buttonStyle2 {
+                height: 100%;
+                width: 100%;
+                display: inline-block;
+                border: none;
+                margin: 0;
+                text-decoration: none;
+                background: #0069ed;
+                color: #ffffff;
+                font-family: sans-serif;
+                font-size: 1rem;
+                cursor: pointer;
+                line-height: 1.2;
+                white-space: nowrap;
+                text-align: center;
+                transition: background 250ms ease-in-out, 
+                            transform 150ms ease;
+                -webkit-appearance: none;
+                -moz-appearance: none;
+            }
+            /* .buttonStyle3 {
+                height: 100%;
+                width: 100%;
+                display: inline-block;
+                border: none;
+                margin: 0;
+                text-decoration: none;
+                background: #0069ed;
+                color: #ffffff;
+                font-family: sans-serif;
+                font-size: 1rem;
+                cursor: pointer;
+                line-height: 1.2;
+                white-space: nowrap;
+                text-align: center;
+                transition: background 250ms ease-in-out, 
+                            transform 150ms ease;
+                -webkit-appearance: none;
+                -moz-appearance: none;
+            } */
+            .buttonStyle2:hover,
+            .buttonStyle2:focus {
+                opacity: 0.9;
+            }
+
+            .buttonStyle2:focus {
+                outline: 1px solid #fff;
+                outline-offset: -4px;
+            }
+
+            .buttonStyle2:active {
+                transform: scale(0.99);
+            }
+        </style>
+    </head>
+    <body data-rsssl=1>
+        <div class="container">
+            <canvas id="myCanvas" width="1500" height="700"></canvas>
+            <div class="classBox">
+                <div class="spinBox">
+                    <button id="plusSpeed" class="aButton">cheat</button>
+                    <!-- <button id="subtractSpeed" class="aButton">-</button> -->
+                    <button id="spin" class="aButton">Spin</button>
+                    <p id="speed"></p>
+                    <p id="FirstRotateCounter">0</p>
+                    <p id="FinalRotateCounter">0</p>
+                </div>
+                <div class="upgradeBox">
+                    <div class="upgradeContainerStyle1" id="upgradeContainer1"  style="display: none;">
+                        <button class="buttonStyle2 spinUpgrade1" style="display: none;">Double manual spin value<br> 10FS</button>
+                        <button class="buttonStyle2 pathUpgrade1" style="display: none; background: #d33114">Unlock new upgrade path<br> 25FS</button>
+                        <button class="buttonStyle2 pathUpgrade2" style="display: none; background: #d33114">Unlock new upgrade path<br> 500FS</button>
+                    </div>
+                    <div class="upgradeContainerStyle2" id="upgradeContainer2" style="display: none;">
+                        <button class="buttonStyle2 spinUpgrade1" style="display: none;">Double manual spin value<br> 10FS</button>
+                        <button class="buttonStyle2 spinUpgrade2" style="display: none;">Double manual spin value<br> 100FS</button>
+                    </div>
+                    <div class="upgradeContainerStyle2" id="upgradeContainer3" style="display: none;">
+                        <button class="buttonStyle2 autoUpgrade1" style="display: none; background: #f4ec09; color: black;">Auto spin level 1<br> 75FS</button>
+                        <button class="buttonStyle2 autoUpgrade2" style="display: none; background: #f4ec09; color: black;">Auto spin level 2<br> 150FS</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="winBox"></div>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+        <script>
+
+        window.requestAnimFrame = (function(callback) {
+            return window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.oRequestAnimationFrame || window.msRequestAnimationFrame ||
+            function(callback) {
+            window.setTimeout(callback, 1000 / 60);
+            };
+        })();
+        /*
+        * Gear constructor
+        */
+        var setCanvasSize = function() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        }
+        function Gear(config) {
+            this.x = config.x;
+            this.y = config.y;
+            this.outerRadius = config.outerRadius;
+            this.innerRadius = config.innerRadius;
+            this.midRadius = config.midRadius;
+            this.holeRadius = config.holeRadius;
+            this.numTeeth = config.numTeeth;
+            this.theta = config.theta;
+            this.adjustedTheta = config.adjustedTheta;
+            this.thetaSpeed = config.thetaSpeed / 1000;
+            this.lightColor = config.lightColor;
+            this.darkColor = config.darkColor;
+            this.innerGearOuterRadius = config.innerGearOuterRadius;
+            this.innerGearInnerRadius = config.innerGearInnerRadius;
+            this.innerGearMidRadius = config.innerGearMidRadius;
+            this.innerGearNumTeeth = config.innerGearNumTeeth;
+            this.innerGearLightColor = config.innerGearLightColor;
+            this.innerGearDarkColor = config.innerGearDarkColor;
+            this.clockwise = config.clockwise;
+        }
+        /*
+        * Gear draw method
+        */
+        Gear.prototype.draw = function() {
+            var canvas = document.getElementById('myCanvas');
+            var context = canvas.getContext('2d');
+
+            context.save();
+            var numPoints = this.numTeeth * 2;
+            // draw gear teeth
+            context.beginPath();
+            context.lineJoin = 'bevel';
+            for(var n = 0; n < numPoints; n++) {
+
+            var radius = null;
+
+            if(n % 2 == 0) {
+                radius = this.outerRadius;
+            }
+            else {
+                radius = this.innerRadius;
+            }
+
+            var theta = this.theta;
+            theta += ((Math.PI * 2) / numPoints) * (n + 1);
+
+            var x = (radius * Math.sin(theta)) + this.x;
+            var y = (radius * Math.cos(theta)) + this.y;
+
+            if(n == 0) {
+                context.moveTo(x, y);
+            }
+            else {
+                context.lineTo(x, y);
+            }
+            }
+
+            context.closePath();
+            context.lineWidth = 5;
+            context.strokeStyle = this.darkColor;
+            context.stroke();
+
+            // draw gear body
+            context.beginPath();
+            context.arc(this.x, this.y, this.midRadius, 0, 2 * Math.PI, false);
+
+            // var grd = context.createLinearGradient(this.x - 100, this.y - 100, this.x + 100, this.y + 100);
+            // grd.addColorStop(0, this.lightColor);
+            // grd.addColorStop(1, this.darkColor);
+            var grd = this.lightColor;
+            context.fillStyle = grd;
+            context.fill();
+            context.lineWidth = 5;
+            context.strokeStyle = this.darkColor;
+            context.stroke();
+
+            // draw inner gear teeth
+            var InnerNumPoints = this.innerGearNumTeeth * 2;
+            context.beginPath();
+            context.lineJoin = 'bevel';
+            for(var n = 0; n < InnerNumPoints; n++) {
+
+            var radius = null;
+
+            if(n % 2 == 0) {
+                radius = this.innerGearOuterRadius;
+            }
+            else {
+                radius = this.innerGearInnerRadius;
+            }
+
+            var theta = this.theta;
+            theta += ((Math.PI * 2) / InnerNumPoints) * (n + 1);
+
+            var x = (radius * Math.sin(theta)) + this.x;
+            var y = (radius * Math.cos(theta)) + this.y;
+
+            if(n == 0) {
+                context.moveTo(x, y);
+            }
+            else {
+                context.lineTo(x, y);
+            }
+            }
+
+            context.closePath();
+            context.lineWidth = 5;
+            context.strokeStyle = this.innerGearDarkColor;
+            context.stroke();
+
+            // draw inner gear body
+            context.beginPath();
+            context.arc(this.x, this.y, this.innerGearMidRadius, 0, 2 * Math.PI, false);
+
+            // var grd = context.createLinearGradient(this.x - 100, this.y - 100, this.x + 100, this.y + 100);
+            // grd.addColorStop(0, this.innerGearLightColor);
+            // grd.addColorStop(1, this.innerGearDarkColor);
+            var grd = this.innerGearLightColor;
+            context.fillStyle = grd;
+            context.fill();
+            context.lineWidth = 5;
+            context.strokeStyle = this.innerGearDarkColor;
+            context.stroke();
+
+            // draw gear hole
+            context.beginPath();
+            context.arc(this.x, this.y, this.holeRadius, 0, 2 * Math.PI, false);
+            context.fillStyle = 'white';
+            context.fill();
+            context.strokeStyle = this.innerGearDarkColor;
+            context.stroke();
+            context.restore();
+        };
+        function animate(gears, lastTime) {
+            var canvas = document.getElementById('myCanvas');
+            var context = canvas.getContext('2d');
+
+            // update
+            var time = (new Date()).getTime();
+            var timeDiff = time - lastTime;
+
+            for(var i = 0; i < gears.length; i++) {
+                var gear = gears[i];
+
+                if(gears[i].clockwise) {
+                    gears[i].theta -= (gear.thetaSpeed * timeDiff);
+                }
+                else {
+                    gears[i].theta += (gear.thetaSpeed * timeDiff);
+                }
+            }
+
+            // clear
+            context.clearRect(0, 0, canvas.width, canvas.height);
+
+            // draw
+            for(var i = 0; i < gears.length; i++) {
+                gears[i].draw();
+            }
+
+            // request new frame
+            requestAnimFrame(function() {
+                animate(gears, time);
+            });
+        }
+
+        // get random color
+        function getRandomColor() {
+        var letters = '0123456789ABCDEF';
+        var color = '#';
+        for (var i = 0; i < 6; i++) {
+            color += letters[Math.floor(Math.random() * 16)];
+        }
+        return color;
+        }
+
+        function padZero(str, len) {
+            len = len || 2;
+            var zeros = new Array(len).join('0');
+            return (zeros + str).slice(-len);
+        }
+
+        var gears = [];
+
+        gears.push(new Gear({
+            x: 120,
+            y: 105,
+            outerRadius: 90,
+            innerRadius: 50,
+            midRadius: 80,
+            holeRadius: 1,
+            numTeeth: 24,
+            theta: 0,
+            adjustedTheta: 0,
+            thetaSpeed: 1,
+            lightColor: '#000000',
+            darkColor: getRandomColor(),
+            innerGearOuterRadius: 40,
+            innerGearInnerRadius: 20,
+            innerGearMidRadius: 30,
+            innerGearNumTeeth: 8,
+            innerGearLightColor: '#FFFFFF',
+            innerGearDarkColor: '#FFFFFF',
+            clockwise: false
+        }));
+        
+        gears.push(new Gear({
+            x: 247,
+            y: 105,
+            outerRadius: 90,
+            innerRadius: 50,
+            midRadius: 80,
+            holeRadius: 10,
+            numTeeth: 24,
+            theta: -0.07,
+            adjustedTheta: -0.07,
+            thetaSpeed: 1,
+            lightColor: '#000000',
+            darkColor: getRandomColor(),
+            innerGearOuterRadius: 40,
+            innerGearInnerRadius: 20,
+            innerGearMidRadius: 30,
+            innerGearNumTeeth: 8,
+            innerGearLightColor: '#FFFFFF',
+            innerGearDarkColor: '#FFFFFF',
+            clockwise: true
+        }));
+
+        gears.push(new Gear({
+            x: 374,
+            y: 105,
+            outerRadius: 90,
+            innerRadius: 50,
+            midRadius: 80,
+            holeRadius: 10,
+            numTeeth: 24,
+            theta: 0.1,
+            adjustedTheta: 0.1,
+            thetaSpeed: 1,
+            lightColor: '#000000',
+            darkColor: getRandomColor(),
+            innerGearOuterRadius: 40,
+            innerGearInnerRadius: 20,
+            innerGearMidRadius: 30,
+            innerGearNumTeeth: 8,
+            innerGearLightColor: '#FFFFFF',
+            innerGearDarkColor: '#FFFFFF',
+            clockwise: false
+        }));
+
+        gears.push(new Gear({
+            x: 501,
+            y: 105,
+            outerRadius: 90,
+            innerRadius: 50,
+            midRadius: 80,
+            holeRadius: 10,
+            numTeeth: 24,
+            theta: -0.12,
+            adjustedTheta: -0.12,
+            thetaSpeed: 1,
+            lightColor: '#000000',
+            darkColor: getRandomColor(),
+            innerGearOuterRadius: 40,
+            innerGearInnerRadius: 20,
+            innerGearMidRadius: 30,
+            innerGearNumTeeth: 8,
+            innerGearLightColor: '#FFFFFF',
+            innerGearDarkColor: '#FFFFFF',
+            clockwise: true
+        }));
+
+        gears.push(new Gear({
+            x: 628,
+            y: 105,
+            outerRadius: 90,
+            innerRadius: 50,
+            midRadius: 80,
+            holeRadius: 10,
+            numTeeth: 24,
+            theta: 0.12,
+            adjustedTheta: 0.12,
+            thetaSpeed: 1,
+            lightColor: '#000000',
+            darkColor: getRandomColor(),
+            innerGearOuterRadius: 40,
+            innerGearInnerRadius: 20,
+            innerGearMidRadius: 30,
+            innerGearNumTeeth: 8,
+            innerGearLightColor: '#FFFFFF',
+            innerGearDarkColor: '#FFFFFF',
+            clockwise: false
+        }));
+
+        gears.push(new Gear({
+            x: 755,
+            y: 105,
+            outerRadius: 90,
+            innerRadius: 50,
+            midRadius: 80,
+            holeRadius: 10,
+            numTeeth: 24,
+            theta: 0.12,
+            adjustedTheta: 0.12,
+            thetaSpeed: 1,
+            lightColor: '#000000',
+            darkColor: getRandomColor(),
+            innerGearOuterRadius: 40,
+            innerGearInnerRadius: 20,
+            innerGearMidRadius: 30,
+            innerGearNumTeeth: 8,
+            innerGearLightColor: '#FFFFFF',
+            innerGearDarkColor: '#FFFFFF',
+            clockwise: true
+        }));
+
+        gears.push(new Gear({
+            x: 755,
+            y: 232,
+            outerRadius: 90,
+            innerRadius: 50,
+            midRadius: 80,
+            holeRadius: 10,
+            numTeeth: 24,
+            theta: 0.12,
+            adjustedTheta: 0.12,
+            thetaSpeed: 1,
+            lightColor: '#000000',
+            darkColor: getRandomColor(),
+            innerGearOuterRadius: 40,
+            innerGearInnerRadius: 20,
+            innerGearMidRadius: 30,
+            innerGearNumTeeth: 8,
+            innerGearLightColor: '#FFFFFF',
+            innerGearDarkColor: '#FFFFFF',
+            clockwise: false
+        }));
+
+        gears.push(new Gear({
+            x: 755,
+            y: 359,
+            outerRadius: 90,
+            innerRadius: 50,
+            midRadius: 80,
+            holeRadius: 10,
+            numTeeth: 24,
+            theta: 0.12,
+            adjustedTheta: 0.12,
+            thetaSpeed: 1,
+            lightColor: '#000000',
+            darkColor: getRandomColor(),
+            innerGearOuterRadius: 40,
+            innerGearInnerRadius: 20,
+            innerGearMidRadius: 30,
+            innerGearNumTeeth: 8,
+            innerGearLightColor: '#FFFFFF',
+            innerGearDarkColor: '#FFFFFF',
+            clockwise: true
+        }));
+
+        gears.push(new Gear({
+            x: 755,
+            y: 486,
+            outerRadius: 90,
+            innerRadius: 50,
+            midRadius: 80,
+            holeRadius: 10,
+            numTeeth: 24,
+            theta: 0.12,
+            adjustedTheta: 0.12,
+            thetaSpeed: 1,
+            lightColor: '#000000',
+            darkColor: getRandomColor(),
+            innerGearOuterRadius: 40,
+            innerGearInnerRadius: 20,
+            innerGearMidRadius: 30,
+            innerGearNumTeeth: 8,
+            innerGearLightColor: '#FFFFFF',
+            innerGearDarkColor: '#FFFFFF',
+            clockwise: false
+        }));
+
+        gears.push(new Gear({
+            x: 628,
+            y: 486,
+            outerRadius: 90,
+            innerRadius: 50,
+            midRadius: 80,
+            holeRadius: 10,
+            numTeeth: 24,
+            theta: 0.12,
+            adjustedTheta: 0.12,
+            thetaSpeed: 1,
+            lightColor: '#000000',
+            darkColor: getRandomColor(),
+            innerGearOuterRadius: 40,
+            innerGearInnerRadius: 20,
+            innerGearMidRadius: 30,
+            innerGearNumTeeth: 8,
+            innerGearLightColor: '#FFFFFF',
+            innerGearDarkColor: '#FFFFFF',
+            clockwise: true
+        }));
+
+        gears.push(new Gear({
+            x: 501,
+            y: 486,
+            outerRadius: 90,
+            innerRadius: 50,
+            midRadius: 80,
+            holeRadius: 10,
+            numTeeth: 24,
+            theta: 0.12,
+            adjustedTheta: 0.12,
+            thetaSpeed: 1,
+            lightColor: '#000000',
+            darkColor: getRandomColor(),
+            innerGearOuterRadius: 40,
+            innerGearInnerRadius: 20,
+            innerGearMidRadius: 30,
+            innerGearNumTeeth: 8,
+            innerGearLightColor: '#FFFFFF',
+            innerGearDarkColor: '#FFFFFF',
+            clockwise: false
+        }));
+
+        gears.push(new Gear({
+            x: 374,
+            y: 486,
+            outerRadius: 90,
+            innerRadius: 50,
+            midRadius: 80,
+            holeRadius: 10,
+            numTeeth: 24,
+            theta: 0.12,
+            adjustedTheta: 0.12,
+            thetaSpeed: 1,
+            lightColor: '#000000',
+            darkColor: getRandomColor(),
+            innerGearOuterRadius: 40,
+            innerGearInnerRadius: 20,
+            innerGearMidRadius: 30,
+            innerGearNumTeeth: 8,
+            innerGearLightColor: '#FFFFFF',
+            innerGearDarkColor: '#FFFFFF',
+            clockwise: true
+        }));
+
+        gears.push(new Gear({
+            x: 247,
+            y: 486,
+            outerRadius: 90,
+            innerRadius: 50,
+            midRadius: 80,
+            holeRadius: 10,
+            numTeeth: 24,
+            theta: 0.12,
+            adjustedTheta: 0.12,
+            thetaSpeed: 1,
+            lightColor: '#000000',
+            darkColor: getRandomColor(),
+            innerGearOuterRadius: 40,
+            innerGearInnerRadius: 20,
+            innerGearMidRadius: 30,
+            innerGearNumTeeth: 8,
+            innerGearLightColor: '#FFFFFF',
+            innerGearDarkColor: '#FFFFFF',
+            clockwise: false
+        }));
+
+        gears.push(new Gear({
+            x: 120,
+            y: 486,
+            outerRadius: 90,
+            innerRadius: 50,
+            midRadius: 80,
+            holeRadius: 10,
+            numTeeth: 24,
+            theta: 0.12,
+            adjustedTheta: 0.12,
+            thetaSpeed: 1,
+            lightColor: '#000000',
+            darkColor: getRandomColor(),
+            innerGearOuterRadius: 40,
+            innerGearInnerRadius: 20,
+            innerGearMidRadius: 30,
+            innerGearNumTeeth: 8,
+            innerGearLightColor: '#FFFFFF',
+            innerGearDarkColor: '#FFFFFF',
+            clockwise: true
+        }));
+
+        var time = (new Date()).getTime();
+        animate(gears, time);
+
+        // // invert color for inner gear
+        // function invertColor(hex) {
+        // if (hex.indexOf('#') === 0) {
+        //     hex = hex.slice(1);
+        // }
+        // if (hex.length === 3) {
+        //     hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
+        // }
+        // if (hex.length !== 6) {
+        //     throw new Error('Invalid HEX color.');
+        // }
+        // var r = (255 - parseInt(hex.slice(0, 2), 16)).toString(16),
+        //     g = (255 - parseInt(hex.slice(2, 4), 16)).toString(16),
+        //     b = (255 - parseInt(hex.slice(4, 6), 16)).toString(16);
+        // return '#' + padZero(r) + padZero(g) + padZero(b);
+        // }
+
+        // for(var j = 0; j < gears.length; j++){
+        //     gears[j].thetaSpeed = 0;
+        //     gears[j].innerGearLightColor = invertColor(gears[j].lightColor);
+        //     gears[j].innerGearDarkColor = invertColor(gears[j].darkColor);
+        //     if(j > 0){
+        //         gears[j].thetaSpeed = gears[j-1].thetaSpeed/3;
+        //     }
+        // }
+
+        for(var j = 0; j < gears.length; j++){
+            gears[j].thetaSpeed = 0;
+            gears[j].innerGearLightColor = getRandomColor();
+            gears[j].innerGearDarkColor = getRandomColor();
+            if(j > 0){
+                gears[j].thetaSpeed = gears[j-1].thetaSpeed/3;
+            }
+        }
+
+        // document.getElementById("speed").innerHTML = "Speed: " + gears[0].thetaSpeed*1000;
+
+        $( "#plusSpeed" ).click(function() {
+            gears[0].thetaSpeed += 1000
+        });
+        $( "#subtractSpeed" ).click(function() {
+            gears[0].thetaSpeed -= gameData.spinClickSpeed;
+        });
+
+        //spin first gear
+        $( "#spin" ).click(function() {
+            gears[0].thetaSpeed += gameData.spinClickSpeed;
+        });
+        
+        var gameData = {
+            spinClickSpeed: 0.001,
+            spinUpgrades: [
+                {
+                    unlocked: true,
+                    affordable: false,
+                    purchased: false,
+                },
+                {
+                    unlocked: false,
+                    affordable: false,
+                    purchased: false,
+                },
+                {
+                    unlocked: false,
+                    affordable: false,
+                    purchased: false,
+                },
+                {
+                    unlocked: false,
+                    affordable: false,
+                    purchased: false,
+                },
+                {
+                    unlocked: false,
+                    affordable: false,
+                    purchased: false,
+                }
+            ],
+            pathUpgrades: [
+                {
+                    unlocked: true,
+                    affordable: false,
+                    purchased: false,
+                },
+                {
+                    unlocked: false,
+                    affordable: false,
+                    purchased: false,
+                },
+            ],
+            autoSpinUpgrades: [
+                {
+                    unlocked: false,
+                    affordable: false,
+                    purchased: false,
+                },
+                {
+                    unlocked: false,
+                    affordable: false,
+                    purchased: false,
+                },
+            ],
+            autoFSpersecond: 0,
+            FSpersecond: 0,
+            firstGearRotations: 0,
+            lastGearRotations: 0,
+            lock: false,
+        }
+        // ██    ██ ██████   ██████  ██████   █████  ██████  ███████ ███████ 
+        // ██    ██ ██   ██ ██       ██   ██ ██   ██ ██   ██ ██      ██      
+        // ██    ██ ██████  ██   ███ ██████  ███████ ██   ██ █████   ███████ 
+        // ██    ██ ██      ██    ██ ██   ██ ██   ██ ██   ██ ██           ██ 
+        //  ██████  ██       ██████  ██   ██ ██   ██ ██████  ███████ ███████                  
+        //manual spin upgrades
+        $( ".spinUpgrade1" ).click(function() {
+            if(gameData.spinUpgrades[0].purchased == false && gameData.spinUpgrades[0].affordable == true && gameData.lock == false){
+                $(".buttonStyle2").css("height", "100%")
+                gameData.spinClickSpeed *= 2;
+                gameData.spinUpgrades[0].purchased = true;
+                $(".spinUpgrade1").hide();
+                rewindGears(10*(Math.PI*2));
+            }
+        });
+        
+        $( ".spinUpgrade2" ).click(function() {
+            if(gameData.spinUpgrades[1].purchased == false && gameData.spinUpgrades[1].affordable == true && gameData.lock == false){
+                gameData.spinClickSpeed *= 2;
+                gameData.spinUpgrades[1].purchased = true;
+                $(".spinUpgrade2").hide();
+                $("#upgradeContainer2").hide();
+                rewindGears(100*(Math.PI*2));
+            }
+        });
+
+        //path upgrades
+        $( ".pathUpgrade1" ).click(function() {
+            if(gameData.pathUpgrades[0].purchased == false && gameData.pathUpgrades[0].affordable && gameData.lock == false){
+                $(".buttonStyle2").css("height", "100%")
+                gameData.pathUpgrades[0].purchased = true;
+                $(".pathUpgrade1").hide();
+                $("#upgradeContainer1").hide();
+                rewindGears(25*(Math.PI*2));
+            }
+        });
+
+        $( ".pathUpgrade2" ).click(function() {
+            if(gameData.pathUpgrades[1].purchased == false && gameData.pathUpgrades[1].affordable && gameData.lock == false){
+                gameData.pathUpgrades[1].purchased = true;
+                $(".pathUpgrade2").hide();
+                $("#upgradeContainer1").hide();
+                rewindGears(500*(Math.PI*2));
+            }
+        });
+
+        //auto spin upgrades
+        $( ".autoUpgrade1" ).click(function() {
+            if(gameData.autoSpinUpgrades[0].purchased == false && gameData.autoSpinUpgrades[0].affordable && gameData.lock == false){
+            gameData.autoSpinUpgrades[0].purchased = true;
+            gameData.autoFSpersecond = 0.000062;
+            $(".autoUpgrade1").hide();
+            $("#upgradeContainer3").hide();
+            rewindGears(75*(Math.PI*2));
+            }
+        });
+        
+        $( ".autoUpgrade2" ).click(function() {
+            if(gameData.autoSpinUpgrades[1].purchased == false && gameData.autoSpinUpgrades[1].affordable && gameData.lock == false){
+            gameData.autoSpinUpgrades[1].purchased = true;
+            gameData.autoFSpersecond = 0.0001865;
+            $(".autoUpgrade2").hide();
+            $("#upgradeContainer3").hide();
+            rewindGears(200*(Math.PI*2));
+            }
+        });
+
+        // ██████  ███████ ██     ██ ██ ███    ██ ██████      ███████ ██    ██ ███    ██  ██████ ████████ ██  ██████  ███    ██ 
+        // ██   ██ ██      ██     ██ ██ ████   ██ ██   ██     ██      ██    ██ ████   ██ ██         ██    ██ ██    ██ ████   ██ 
+        // ██████  █████   ██  █  ██ ██ ██ ██  ██ ██   ██     █████   ██    ██ ██ ██  ██ ██         ██    ██ ██    ██ ██ ██  ██ 
+        // ██   ██ ██      ██ ███ ██ ██ ██  ██ ██ ██   ██     ██      ██    ██ ██  ██ ██ ██         ██    ██ ██    ██ ██  ██ ██ 
+        // ██   ██ ███████  ███ ███  ██ ██   ████ ██████      ██       ██████  ██   ████  ██████    ██    ██  ██████  ██   ████ 
+        //rewind gears after upgrade purchase
+        function rewindGears(rotations){
+            gameData.lock = true;
+            tempRotations = rotations;
+            for (var i = 0; i < 100; i++) {
+                (function (i) {
+                    setTimeout(function () {
+                        for(var j = 0; j < gears.length; j++){
+                            var adjustedRotations = (gears[j].theta - gears[j].adjustedTheta)
+                            if(adjustedRotations >= 0){
+                                gears[j].theta -= rotations/100;
+                            }
+                            else {
+                                gears[j].theta += rotations/100;
+                            }
+                            rotations /= 3;
+                        }
+                    rotations = tempRotations;
+                    }, 20*i);
+                })(i);
+            };
+            setTimeout(function() { gameData.lock = false }, 3000);
+        }
+
+        //  ██████   █████  ███    ███ ███████     ███████ ██    ██ ███    ██  ██████ ████████ ██  ██████  ███    ██ 
+        // ██       ██   ██ ████  ████ ██          ██      ██    ██ ████   ██ ██         ██    ██ ██    ██ ████   ██ 
+        // ██   ███ ███████ ██ ████ ██ █████       █████   ██    ██ ██ ██  ██ ██         ██    ██ ██    ██ ██ ██  ██ 
+        // ██    ██ ██   ██ ██  ██  ██ ██          ██      ██    ██ ██  ██ ██ ██         ██    ██ ██    ██ ██  ██ ██ 
+        //  ██████  ██   ██ ██      ██ ███████     ██       ██████  ██   ████  ██████    ██    ██  ██████  ██   ████ 
+        function gameTick() {
+            gameData.firstGearRotations = Math.abs(gears[0].theta/(Math.PI*2));
+            gameData.lastGearRotations = Math.abs((gears[gears.length - 1].theta/(Math.PI*2)) - 0.01909859);
+            gameData.FSpersecond = (gears[0].thetaSpeed*1000)/(Math.PI*2);
+            for(var j = 1; j < gears.length; j++){
+                gears[j].thetaSpeed = gears[j-1].thetaSpeed/3;
+            }
+            gears[0].thetaSpeed /= 1.01;
+            document.getElementById("speed").innerHTML = "Speed: " + gameData.FSpersecond.toFixed(2) +"/s";
+            document.getElementById("FirstRotateCounter").innerHTML = "Rotations of First Gear: " + gameData.firstGearRotations.toFixed(2);
+            document.getElementById("FinalRotateCounter").innerHTML = "Rotations of Final Gear: " + gameData.lastGearRotations.toFixed(8);
+            
+            //STAGE 1
+            if(gameData.pathUpgrades[0].purchased == false){
+                if(gameData.spinUpgrades[0].purchased == false){
+                    if(gameData.firstGearRotations >= 10){
+                        gameData.spinUpgrades[0].affordable = true;
+                        $(".spinUpgrade1").show();
+                    }
+                    else{
+                        gameData.spinUpgrades[0].affordable = false;
+                        $(".spinUpgrade1").hide();
+                    }
+                }
+                if(gameData.pathUpgrades[0].purchased == false){
+                    if(gameData.firstGearRotations >= 25){
+                        if(gameData.spinUpgrades[0].purchased == false){
+                            $(".buttonStyle2").css("height", "50%");
+                        }
+                        gameData.pathUpgrades[0].affordable = true;
+                        $(".pathUpgrade1").show();
+                    }
+                    else{
+                        gameData.pathUpgrades[0].affordable = false;
+                        $(".pathUpgrade1").hide();
+                        $(".buttonStyle2").css("height", "100%");
+                    }
+                }
+                if(gameData.pathUpgrades[0].purchased == false){
+                    if((gameData.spinUpgrades[0].affordable == true && gameData.spinUpgrades[0].purchased == false )|| (gameData.pathUpgrades[0].affordable == true && gameData.pathUpgrades[0].purchased == false)){
+                        $("#upgradeContainer1").show()
+                    }
+                    else{
+                        $("#upgradeContainer1").hide();
+                    }
+                }
+            }
+            //STAGE 2
+            if(gameData.pathUpgrades[0].purchased == true && gameData.pathUpgrades[1].purchased == false){
+                if(gameData.spinUpgrades[1].purchased == false && gameData.spinUpgrades[0].purchased == false){
+                    if(gameData.firstGearRotations >= 10){
+                        gameData.spinUpgrades[0].affordable = true;
+                        $(".spinUpgrade1").show();
+                        $("#upgradeContainer2").show();
+                    }
+                    else{
+                        gameData.spinUpgrades[0].affordable = false;
+                        $(".spinUpgrade1").hide();
+                        $("#upgradeContainer2").show();
+                    }
+                }
+                if(gameData.spinUpgrades[1].purchased == false && gameData.spinUpgrades[0].purchased == true){
+                    if(gameData.firstGearRotations >= 100){
+                        gameData.spinUpgrades[1].affordable = true;
+                        $(".spinUpgrade2").show();
+                        $("#upgradeContainer2").show();
+                    }
+                    else{
+                        gameData.spinUpgrades[1].affordable = false;
+                        $(".spinUpgrade2").hide();
+                        $("#upgradeContainer2").hide();
+                    }
+                }
+                if(gameData.autoSpinUpgrades[0].purchased == false){
+                    if(gameData.firstGearRotations >= 75){
+                        gameData.autoSpinUpgrades[0].affordable = true;
+                        $(".autoUpgrade1").show();
+                        $("#upgradeContainer3").show();
+                    }
+                    else{
+                        gameData.autoSpinUpgrades[0].affordable = false;
+                        $(".autoUpgrade1").hide();
+                        $("#upgradeContainer3").hide();
+                    }
+                }
+                if(gameData.autoSpinUpgrades[1].purchased == false && gameData.autoSpinUpgrades[0].purchased == true){
+                    if(gameData.firstGearRotations >= 150){
+                        gameData.autoSpinUpgrades[1].affordable = true;
+                        $(".autoUpgrade2").show();
+                        $("#upgradeContainer3").show();
+                    }
+                    else{
+                        gameData.autoSpinUpgrades[1].affordable = false;
+                        $(".autoUpgrade2").hide();
+                        $("#upgradeContainer3").hide();
+                    }
+                }
+                if(gameData.pathUpgrades[1].purchased == false && gameData.autoSpinUpgrades[1].purchased == true && gameData.spinUpgrades[1].purchased == true){
+                    if(gameData.firstGearRotations >= 500){
+                        gameData.pathUpgrades[1].affordable = true;
+                        $(".pathUpgrade2").show();
+                        $("#upgradeContainer1").show();
+                    }
+                    else{
+                        gameData.pathUpgrades[1].affordable = false;
+                        $(".pathUpgrade2").hide();
+                        $("#upgradeContainer3").hide();
+                    }
+                }
+            }
+
+
+
+
+            
+            gears[0].thetaSpeed += gameData.autoFSpersecond;
+
+            if(gameData.lastGearRotations >= 1){
+                Win();
+            }
+        }
+        var GT = setInterval(gameTick, 20)
+        function Win(){
+            clearInterval(GT);
+            $( ".container" ).remove();
+            // $( ".target" ).show();
+            // $(".winBox" "p").append("Nice");
+            $( "<h1>Nice</h1>" ).appendTo( ".winBox" );
+        }
+        </script>
+    </body>
+</html>
